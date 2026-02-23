@@ -2,89 +2,684 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Оплата</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Космическая оплата</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-            padding: 20px;
-            background: var(--tg-theme-bg-color, #fff);
-            color: var(--tg-theme-text-color, #000);
+        * {
             margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        .method {
-            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
-            border-radius: 12px;
-            padding: 18px;
-            margin: 10px 0;
-            cursor: pointer;
-            font-size: 18px;
-            text-align: center;
-        }
-        .details {
-            display: none;
-            background: var(--tg-theme-secondary-bg-color, #f5f5f5);
-            border-radius: 16px;
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
             padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+            background: linear-gradient(135deg, #0b0719 0%, #1a1b4b 50%, #2d1b4b 100%);
+            color: #ffffff;
         }
-        .details.show {
+
+        /* Анимированные звезды */
+        .stars, .twinkling, .clouds {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+            z-index: -1;
+        }
+
+        .stars {
+            background: #000 url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMiIgaGVpZ2h0PSIyIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxjaXJjbGUgY3g9IjEiIGN5PSIxIiByPSIxIiBmaWxsPSJ3aGl0ZSIgb3BhY2l0eT0iMC4zIi8+PC9zdmc4') repeat;
+            background-size: 2px 2px;
+            animation: stars 200s linear infinite;
+            opacity: 0.8;
+        }
+
+        .twinkling {
+            background: transparent url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNCIgaGVpZ2h0PSI0IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxjaXJjbGUgY3g9IjIiIGN5PSIyIiByPSIxLjUiIGZpbGw9IndoaXRlIiBvcGFjaXR5PSIwLjUiLz48L3N2Zz4=') repeat;
+            background-size: 4px 4px;
+            animation: twinkling 4s linear infinite;
+            opacity: 0.3;
+        }
+
+        .clouds {
+            background: transparent url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cmFkaWFsR3JhZGllbnQgaWQ9ImciPjxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiM0YzNhZmYiIHN0b3Atb3BhY2l0eT0iMC4yIi8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjMDAwMDAwIiBzdG9wLW9wYWNpdHk9IjAiLz48L3JhZGlhbEdyYWRpZW50PjwvZGVmcz48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0MCIgZmlsbD0idXJsKCNnKSIvPjwvc3ZnPg==') repeat;
+            background-size: 100px 100px;
+            animation: clouds 20s linear infinite;
+            opacity: 0.15;
+        }
+
+        @keyframes stars {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-2000px); }
+        }
+
+        @keyframes twinkling {
+            0% { opacity: 0.2; }
+            50% { opacity: 0.5; }
+            100% { opacity: 0.2; }
+        }
+
+        @keyframes clouds {
+            0% { transform: translateX(0) translateY(0); }
+            100% { transform: translateX(-1000px) translateY(-200px); }
+        }
+
+        /* Падающие звезды */
+        .shooting-star {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 0 0 4px rgba(255,255,255,0.1), 0 0 0 8px rgba(255,255,255,0.1), 0 0 20px rgba(255,255,255,0.3);
+            animation: shoot 3s linear infinite;
+            opacity: 0;
+            z-index: -1;
+        }
+
+        .shooting-star:nth-child(1) { top: 10%; left: 20%; animation-delay: 0s; }
+        .shooting-star:nth-child(2) { top: 30%; left: 80%; animation-delay: 1s; }
+        .shooting-star:nth-child(3) { top: 70%; left: 40%; animation-delay: 2s; }
+        .shooting-star:nth-child(4) { top: 50%; left: 90%; animation-delay: 2.5s; }
+        .shooting-star:nth-child(5) { top: 20%; left: 60%; animation-delay: 3.5s; }
+
+        @keyframes shoot {
+            0% {
+                transform: translateX(0) translateY(0) rotate(45deg);
+                opacity: 1;
+                width: 2px;
+            }
+            20% {
+                width: 100px;
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateX(500px) translateY(500px) rotate(45deg);
+                opacity: 0;
+                width: 150px;
+            }
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Планета в фоне */
+        .planet {
+            position: fixed;
+            bottom: -100px;
+            right: -50px;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle at 30% 30%, #4a2b7a, #1a0b2e);
+            border-radius: 50%;
+            box-shadow: 0 0 50px rgba(106, 13, 173, 0.5), inset -20px -20px 50px rgba(0,0,0,0.5);
+            z-index: -1;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        .planet::before {
+            content: '';
+            position: absolute;
+            top: 20%;
+            left: 20%;
+            width: 60px;
+            height: 60px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            box-shadow: 0 0 20px rgba(255,255,255,0.2);
+        }
+
+        .planet::after {
+            content: '';
+            position: absolute;
+            bottom: 30%;
+            right: 20%;
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            box-shadow: 0 0 15px rgba(255,215,0,0.3);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+        }
+
+        /* Неоновый заголовок */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: glowPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes glowPulse {
+            0%, 100% { text-shadow: 0 0 20px #8a2be2, 0 0 40px #4b0082; }
+            50% { text-shadow: 0 0 30px #9370db, 0 0 60px #6a5acd; }
+        }
+
+        .header h1 {
+            font-size: 36px;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #fff, #e0b0ff, #b57cff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: titleFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes titleFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+            color: #c0b0ff;
+            letter-spacing: 2px;
+        }
+
+        /* Карточки с космическим стеклом */
+        .payment-methods {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .method-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(138, 43, 226, 0.3);
+            border-radius: 25px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            animation: cardAppear 0.6s ease-out;
+            animation-fill-mode: both;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .method-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .method-card:hover::before {
+            left: 100%;
+        }
+
+        .method-card:nth-child(1) { animation-delay: 0.1s; }
+        .method-card:nth-child(2) { animation-delay: 0.2s; }
+        .method-card:nth-child(3) { animation-delay: 0.3s; }
+
+        @keyframes cardAppear {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .method-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            border-color: #8a2be2;
+            box-shadow: 0 20px 40px rgba(138, 43, 226, 0.3);
+        }
+
+        .method-emoji {
+            font-size: 40px;
+            width: 70px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(145deg, #2a1b4b, #1a0b3a);
+            border-radius: 35px;
+            border: 1px solid rgba(138, 43, 226, 0.5);
+            animation: emojiPulse 2s infinite;
+        }
+
+        @keyframes emojiPulse {
+            0%, 100% { box-shadow: 0 0 20px #8a2be2; }
+            50% { box-shadow: 0 0 40px #4b0082; }
+        }
+
+        .method-info {
+            flex: 1;
+        }
+
+        .method-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #fff;
+        }
+
+        .method-subtitle {
+            font-size: 14px;
+            color: #b0a0ff;
+        }
+
+        .method-arrow {
+            font-size: 24px;
+            color: #8a2be2;
+            transition: transform 0.3s;
+        }
+
+        .method-card:hover .method-arrow {
+            transform: translateX(10px) scale(1.2);
+        }
+
+        /* Детали с космическим дизайном */
+        .details-panel {
+            background: rgba(10, 5, 30, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(138, 43, 226, 0.3);
+            border-radius: 35px;
+            padding: 25px;
+            margin-top: 20px;
+            animation: galaxyAppear 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            display: none;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .details-panel::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(138,43,226,0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .details-panel.show {
             display: block;
         }
-        button {
-            background: var(--tg-theme-button-color, #40a7e3);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            padding: 16px;
+
+        @keyframes galaxyAppear {
+            from {
+                opacity: 0;
+                transform: scale(0.3) rotate(-10deg);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) rotate(0);
+            }
+        }
+
+        .details-title {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #fff;
+            text-shadow: 0 0 15px #8a2be2;
+            position: relative;
+            z-index: 1;
+        }
+
+        .details-box {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 25px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(138, 43, 226, 0.2);
+            position: relative;
+            z-index: 1;
+            backdrop-filter: blur(5px);
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(138, 43, 226, 0.2);
+            animation: rowGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes rowGlow {
+            0%, 100% { text-shadow: 0 0 5px transparent; }
+            50% { text-shadow: 0 0 10px #8a2be2; }
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            color: #b0a0ff;
+            font-size: 15px;
+        }
+
+        .detail-value {
+            font-weight: 600;
             font-size: 16px;
+            color: #fff;
+            word-break: break-all;
+            text-align: right;
+            max-width: 60%;
+            background: linear-gradient(45deg, #fff, #e0b0ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Космические кнопки */
+        .action-btn {
+            background: linear-gradient(135deg, #6a5acd, #4b0082);
+            border: none;
+            border-radius: 20px;
+            padding: 18px;
+            font-size: 16px;
+            font-weight: 600;
             width: 100%;
-            margin: 8px 0;
             cursor: pointer;
+            margin: 8px 0;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            border: 1px solid rgba(255,255,255,0.1);
         }
-        .back {
+
+        .action-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+            z-index: -1;
+        }
+
+        .action-btn:hover::before {
+            left: 100%;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px #4b0082;
+            border-color: #9370db;
+        }
+
+        .action-btn:active {
+            transform: translateY(2px);
+        }
+
+        .copy-btn {
+            background: linear-gradient(135deg, #483d8b, #2e1b5c);
+        }
+
+        .paid-btn {
+            background: linear-gradient(135deg, #32cd32, #228b22);
+        }
+
+        .back-btn {
             background: transparent;
-            border: 1px solid #ccc;
-            color: #000;
+            border: 2px solid #6a5acd;
+            color: #fff;
         }
-        .hidden {
-            display: none;
+
+        .back-btn:hover {
+            background: rgba(106, 90, 205, 0.2);
+        }
+
+        /* Анимация для кнопок */
+        @keyframes btnPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .paid-btn {
+            animation: btnPulse 2s infinite;
+        }
+
+        /* Неоновые линии */
+        .neon-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #8a2be2, #4b0082, transparent);
+            animation: neonMove 3s linear infinite;
+        }
+
+        @keyframes neonMove {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* Мерцающие точки */
+        .twinkling-dots {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .twinkling-dots::before,
+        .twinkling-dots::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 30% 50%, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: twinkle 4s ease-in-out infinite;
+        }
+
+        .twinkling-dots::after {
+            background-position: 25px 25px;
+            animation-delay: -2s;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; }
+            50% { opacity: 0.5; }
         }
     </style>
 </head>
 <body>
-    <!-- МЕНЮ -->
-    <div id="menu">
-        <h2>💰 Выберите способ оплаты</h2>
-        <div class="method" onclick="showCard()">💳 Банковская карта</div>
-        <div class="method" onclick="showCrypto()">₿ Криптовалюта (USDT)</div>
-        <div class="method" onclick="showPhone()">📱 Перевод по номеру</div>
-    </div>
+    <!-- Звездное небо -->
+    <div class="stars"></div>
+    <div class="twinkling"></div>
+    <div class="clouds"></div>
+    
+    <!-- Падающие звезды -->
+    <div class="shooting-star"></div>
+    <div class="shooting-star"></div>
+    <div class="shooting-star"></div>
+    <div class="shooting-star"></div>
+    <div class="shooting-star"></div>
+    
+    <!-- Планета -->
+    <div class="planet"></div>
+    
+    <!-- Мерцающие точки -->
+    <div class="twinkling-dots"></div>
 
-    <!-- КАРТА -->
-    <div id="card" class="details">
-        <h3>💳 Банковская карта</h3>
-        <p><b>2200 1234 5678 9012</b><br>Получатель: Иван И.</p>
-        <button onclick="copyText('2200 1234 5678 9012')">📋 Копировать номер</button>
-        <button onclick="sendPayment('card')">✅ Я оплатил</button>
-        <button class="back" onclick="backToMenu()">← Назад</button>
-    </div>
+    <div class="container">
+        <!-- Неоновый заголовок -->
+        <div class="header">
+            <div class="neon-line"></div>
+            <h1>🚀 КОСМИЧЕСКАЯ ОПЛАТА</h1>
+            <p>✧ ВЫБЕРИТЕ СПОСОБ ОПЛАТЫ ✧</p>
+        </div>
 
-    <!-- КРИПТА -->
-    <div id="crypto" class="details">
-        <h3>₿ Криптовалюта USDT (TRC20)</h3>
-        <p><b>TXYZ123456789abcdefghijklmn</b></p>
-        <button onclick="copyText('TXYZ123456789abcdefghijklmn')">📋 Копировать адрес</button>
-        <button onclick="sendPayment('crypto')">✅ Я оплатил</button>
-        <button class="back" onclick="backToMenu()">← Назад</button>
-    </div>
+        <!-- МЕНЮ -->
+        <div id="menu" class="payment-methods">
+            <div class="method-card" onclick="showCard()">
+                <span class="method-emoji">💳</span>
+                <div class="method-info">
+                    <div class="method-title">Банковская карта</div>
+                    <div class="method-subtitle">Visa, MasterCard, МИР</div>
+                </div>
+                <span class="method-arrow">✨</span>
+            </div>
+            
+            <div class="method-card" onclick="showCrypto()">
+                <span class="method-emoji">₿</span>
+                <div class="method-info">
+                    <div class="method-title">Криптовалюта</div>
+                    <div class="method-subtitle">USDT (TRC20)</div>
+                </div>
+                <span class="method-arrow">✨</span>
+            </div>
+            
+            <div class="method-card" onclick="showPhone()">
+                <span class="method-emoji">📱</span>
+                <div class="method-info">
+                    <div class="method-title">Перевод по номеру</div>
+                    <div class="method-subtitle">СБП / Перевод</div>
+                </div>
+                <span class="method-arrow">✨</span>
+            </div>
+        </div>
 
-    <!-- ТЕЛЕФОН -->
-    <div id="phone" class="details">
-        <h3>📱 Перевод по номеру</h3>
-        <p><b>+7 999 123-45-67</b><br>Получатель: Иван И.</p>
-        <button onclick="copyText('+79991234567')">📋 Копировать номер</button>
-        <button onclick="sendPayment('phone')">✅ Я оплатил</button>
-        <button class="back" onclick="backToMenu()">← Назад</button>
+        <!-- ДЕТАЛИ КАРТЫ -->
+        <div id="card" class="details-panel">
+            <div class="details-title">
+                <span>💳</span>
+                <span>Галактическая карта</span>
+            </div>
+            <div class="details-box">
+                <div class="detail-row">
+                    <span class="detail-label">Номер карты</span>
+                    <span class="detail-value">2200 1234 5678 9012</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Получатель</span>
+                    <span class="detail-value">Иван И.</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Космобанк</span>
+                    <span class="detail-value">🌟 Галактический</span>
+                </div>
+            </div>
+            <button class="action-btn copy-btn" onclick="copyText('2200 1234 5678 9012')">
+                <span>📋</span> Копировать номер
+            </button>
+            <button class="action-btn paid-btn" onclick="sendPayment('card')">
+                <span>✅</span> Я оплатил в космосе
+            </button>
+            <button class="action-btn back-btn" onclick="backToMenu()">
+                <span>←</span> Вернуться к звездам
+            </button>
+        </div>
+
+        <!-- ДЕТАЛИ КРИПТЫ -->
+        <div id="crypto" class="details-panel">
+            <div class="details-title">
+                <span>₿</span>
+                <span>Крипто-галактика</span>
+            </div>
+            <div class="details-box">
+                <div class="detail-row">
+                    <span class="detail-label">Сеть</span>
+                    <span class="detail-value">✨ TRC20</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Адрес кошелька</span>
+                    <span class="detail-value">TXYZ123456789abcdef</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Мин. сумма</span>
+                    <span class="detail-value">10 USDT</span>
+                </div>
+            </div>
+            <button class="action-btn copy-btn" onclick="copyText('TXYZ123456789abcdef')">
+                <span>📋</span> Копировать адрес
+            </button>
+            <button class="action-btn paid-btn" onclick="sendPayment('crypto')">
+                <span>✅</span> Я отправил в космос
+            </button>
+            <button class="action-btn back-btn" onclick="backToMenu()">
+                <span>←</span> Вернуться к звездам
+            </button>
+        </div>
+
+        <!-- ДЕТАЛИ ТЕЛЕФОНА -->
+        <div id="phone" class="details-panel">
+            <div class="details-title">
+                <span>📱</span>
+                <span>Межгалактический перевод</span>
+            </div>
+            <div class="details-box">
+                <div class="detail-row">
+                    <span class="detail-label">Номер телефона</span>
+                    <span class="detail-value">+7 999 123-45-67</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Получатель</span>
+                    <span class="detail-value">Иван И.</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Система</span>
+                    <span class="detail-value">🌍 СБП</span>
+                </div>
+            </div>
+            <button class="action-btn copy-btn" onclick="copyText('+79991234567')">
+                <span>📋</span> Копировать номер
+            </button>
+            <button class="action-btn paid-btn" onclick="sendPayment('phone')">
+                <span>✅</span> Я перевел в космос
+            </button>
+            <button class="action-btn back-btn" onclick="backToMenu()">
+                <span>←</span> Вернуться к звездам
+            </button>
+        </div>
     </div>
 
     <script>
@@ -108,7 +703,7 @@
         }
 
         function backToMenu() {
-            document.getElementById('menu').style.display = 'block';
+            document.getElementById('menu').style.display = 'flex';
             document.getElementById('card').classList.remove('show');
             document.getElementById('crypto').classList.remove('show');
             document.getElementById('phone').classList.remove('show');
@@ -117,7 +712,30 @@
         function copyText(text) {
             navigator.clipboard.writeText(text);
             tg.HapticFeedback.notificationOccurred('success');
-            alert('✅ Скопировано!');
+            
+            // Создаем космическое уведомление
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: linear-gradient(135deg, #6a5acd, #4b0082);
+                color: white;
+                padding: 15px 30px;
+                border-radius: 30px;
+                font-size: 16px;
+                box-shadow: 0 0 30px #8a2be2;
+                z-index: 1000;
+                animation: notificationFloat 2s ease-out forwards;
+                border: 1px solid rgba(255,255,255,0.3);
+            `;
+            notification.innerHTML = '✨ Скопировано в космос! ✨';
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 2000);
         }
 
         function sendPayment(method) {
@@ -125,9 +743,34 @@
                 type: 'payment',
                 method: method
             }));
-            alert('✅ Спасибо! Мы проверим платёж.');
+            
+            alert('🚀 Спасибо! Платеж улетел в космос и будет проверен!');
             tg.close();
         }
+
+        // Добавляем стиль для уведомления
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes notificationFloat {
+                0% {
+                    opacity: 0;
+                    transform: translateX(-50%) translateY(-20px);
+                }
+                20% {
+                    opacity: 1;
+                    transform: translateX(-50%) translateY(0);
+                }
+                80% {
+                    opacity: 1;
+                    transform: translateX(-50%) translateY(0);
+                }
+                100% {
+                    opacity: 0;
+                    transform: translateX(-50%) translateY(-20px);
+                }
+            }
+        `;
+        document.head.appendChild(style);
     </script>
 </body>
 </html>
