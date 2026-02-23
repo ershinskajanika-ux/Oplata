@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Оплата</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            padding: 20px;
+            background: var(--tg-theme-bg-color, #fff);
+            color: var(--tg-theme-text-color, #000);
+            margin: 0;
+        }
+        .method {
+            background: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            border-radius: 12px;
+            padding: 18px;
+            margin: 10px 0;
+            cursor: pointer;
+            font-size: 18px;
+            text-align: center;
+        }
+        .details {
+            display: none;
+            background: var(--tg-theme-secondary-bg-color, #f5f5f5);
+            border-radius: 16px;
+            padding: 20px;
+        }
+        .details.show {
+            display: block;
+        }
+        button {
+            background: var(--tg-theme-button-color, #40a7e3);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 16px;
+            font-size: 16px;
+            width: 100%;
+            margin: 8px 0;
+            cursor: pointer;
+        }
+        .back {
+            background: transparent;
+            border: 1px solid #ccc;
+            color: #000;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- МЕНЮ -->
+    <div id="menu">
+        <h2>💰 Выберите способ оплаты</h2>
+        <div class="method" onclick="showCard()">💳 Банковская карта</div>
+        <div class="method" onclick="showCrypto()">₿ Криптовалюта (USDT)</div>
+        <div class="method" onclick="showPhone()">📱 Перевод по номеру</div>
+    </div>
+
+    <!-- КАРТА -->
+    <div id="card" class="details">
+        <h3>💳 Банковская карта</h3>
+        <p><b>2200 1234 5678 9012</b><br>Получатель: Иван И.</p>
+        <button onclick="copyText('2200 1234 5678 9012')">📋 Копировать номер</button>
+        <button onclick="sendPayment('card')">✅ Я оплатил</button>
+        <button class="back" onclick="backToMenu()">← Назад</button>
+    </div>
+
+    <!-- КРИПТА -->
+    <div id="crypto" class="details">
+        <h3>₿ Криптовалюта USDT (TRC20)</h3>
+        <p><b>TXYZ123456789abcdefghijklmn</b></p>
+        <button onclick="copyText('TXYZ123456789abcdefghijklmn')">📋 Копировать адрес</button>
+        <button onclick="sendPayment('crypto')">✅ Я оплатил</button>
+        <button class="back" onclick="backToMenu()">← Назад</button>
+    </div>
+
+    <!-- ТЕЛЕФОН -->
+    <div id="phone" class="details">
+        <h3>📱 Перевод по номеру</h3>
+        <p><b>+7 999 123-45-67</b><br>Получатель: Иван И.</p>
+        <button onclick="copyText('+79991234567')">📋 Копировать номер</button>
+        <button onclick="sendPayment('phone')">✅ Я оплатил</button>
+        <button class="back" onclick="backToMenu()">← Назад</button>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+
+        function showCard() {
+            document.getElementById('menu').style.display = 'none';
+            document.getElementById('card').classList.add('show');
+        }
+
+        function showCrypto() {
+            document.getElementById('menu').style.display = 'none';
+            document.getElementById('crypto').classList.add('show');
+        }
+
+        function showPhone() {
+            document.getElementById('menu').style.display = 'none';
+            document.getElementById('phone').classList.add('show');
+        }
+
+        function backToMenu() {
+            document.getElementById('menu').style.display = 'block';
+            document.getElementById('card').classList.remove('show');
+            document.getElementById('crypto').classList.remove('show');
+            document.getElementById('phone').classList.remove('show');
+        }
+
+        function copyText(text) {
+            navigator.clipboard.writeText(text);
+            tg.HapticFeedback.notificationOccurred('success');
+            alert('✅ Скопировано!');
+        }
+
+        function sendPayment(method) {
+            tg.sendData(JSON.stringify({
+                type: 'payment',
+                method: method
+            }));
+            alert('✅ Спасибо! Мы проверим платёж.');
+            tg.close();
+        }
+    </script>
+</body>
+</html>
