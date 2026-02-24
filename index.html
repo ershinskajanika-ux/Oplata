@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Космическая оплата</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1"></script>
+    <!-- Подключаем шрифты -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Prosto+One&family=Viaoda+Libre&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Prosto One', sans-serif;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+            /* Переливающийся градиент: оранжевый, фиолетовый, глубокий синий */
+            background: linear-gradient(-45deg, #FF4E00, #8A2BE2, #1E3C72, #2A5298);
+            background-size: 400% 400%;
+            animation: gradient 10s ease infinite;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Сияющая звезда над заголовком */
+        .glowing-star {
+            text-align: center;
+            margin-bottom: 10px;
+            animation: starGlow 2s ease-in-out infinite;
+        }
+
+        .glowing-star span {
+            font-size: 60px;
+            display: inline-block;
+            filter: drop-shadow(0 0 20px #FFD700);
+            animation: starRotate 3s linear infinite;
+        }
+
+        @keyframes starGlow {
+            0%, 100% { filter: drop-shadow(0 0 10px #FFA500) drop-shadow(0 0 20px #FF4500); }
+            50% { filter: drop-shadow(0 0 30px #FFD700) drop-shadow(0 0 50px #FF6347); }
+        }
+
+        @keyframes starRotate {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(10deg); }
+            75% { transform: rotate(-10deg); }
+            100% { transform: rotate(0deg); }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-family: 'Viaoda Libre', cursive;
+            font-size: 42px;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #fff, #FFD700, #FFA500);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(255, 165, 0, 0.5);
+            letter-spacing: 2px;
+        }
+
+        .header p {
+            font-family: 'Prosto One', sans-serif;
+            font-size: 18px;
+            color: #FFE4B5;
+            letter-spacing: 3px;
+            text-shadow: 0 0 10px #FF8C00;
+            text-transform: uppercase;
+        }
+
+        /* Карточки валют */
+        .currency-methods {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .currency-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 165, 0, 0.3);
+            border-radius: 25px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.4s;
+            flex: 1;
+            min-width: 100px;
+            text-align: center;
+            animation: cardAppear 0.6s ease-out;
+            animation-fill-mode: both;
+            box-shadow: 0 8px 32px rgba(255, 69, 0, 0.3);
+        }
+
+        .currency-card:nth-child(1) { animation-delay: 0.1s; }
+        .currency-card:nth-child(2) { animation-delay: 0.2s; }
+        .currency-card:nth-child(3) { animation-delay: 0.3s; }
+
+        @keyframes cardAppear {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .currency-card:hover {
+            transform: translateY(-5px) scale(1.05);
+            border-color: #FF8C00;
+            box-shadow: 0 20px 40px rgba(255, 69, 0, 0.4);
+        }
+
+        .currency-emoji {
+            font-size: 40px;
+            margin-bottom: 10px;
+            display: block;
+            filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.5));
+        }
+
+        .currency-name {
+            font-family: 'Prosto One', sans-serif;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            background: linear-gradient(45deg, #fff, #FFD700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .currency-desc {
+            font-family: 'Prosto One', sans-serif;
+            font-size: 12px;
+            color: #FFE4B5;
+        }
+
+        /* Панель с деталями */
+        .details-panel {
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 140, 0, 0.3);
+            border-radius: 35px;
+            padding: 25px;
+            margin-top: 20px;
+            animation: panelAppear 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            display: none;
+            box-shadow: 0 25px 50px -12px rgba(255, 69, 0, 0.3);
+        }
+
+        .details-panel.show {
+            display: block;
+        }
+
+        @keyframes panelAppear {
+            from {
+                opacity: 0;
+                transform: scale(0.3) rotate(-10deg);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) rotate(0);
+            }
+        }
+
+        .details-title {
+            font-family: 'Viaoda Libre', cursive;
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #fff;
+            text-shadow: 0 0 15px #FF8C00;
+        }
+
+        .details-box {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 25px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 140, 0, 0.2);
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(255, 140, 0, 0.2);
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-family: 'Prosto One', sans-serif;
+            color: #FFB6C1;
+            font-size: 15px;
+        }
+
+        .detail-value {
+            font-family: 'Prosto One', sans-serif;
+            font-weight: 600;
+            font-size: 16px;
+            color: #FFE4B5;
+            word-break: break-all;
+            text-align: right;
+            max-width: 60%;
+        }
+
+        .info-message {
+            background: rgba(255, 140, 0, 0.2);
+            border-left: 4px solid #FF8C00;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            color: #FFE4B5;
+            font-style: italic;
+            animation: pulse 2s infinite;
+            font-family: 'Prosto One', sans-serif;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; }
+        }
+
+        /* Кнопки */
+        .action-btn {
+            background: linear-gradient(135deg, #FF8C00, #FF4500);
+            border: none;
+            border-radius: 20px;
+            padding: 18px;
+            font-size: 16px;
+            font-weight: 600;
+            width: 100%;
+            cursor: pointer;
+            margin: 8px 0;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            box-shadow: 0 0 20px rgba(255, 69, 0, 0.3);
+            font-family: 'Prosto One', sans-serif;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 30px #FF4500;
+        }
+
+        .copy-btn {
+            background: linear-gradient(135deg, #FF6347, #DC143C);
+        }
+
+        .paid-btn {
+            background: linear-gradient(135deg, #32cd32, #228b22);
+            animation: btnPulse 2s infinite;
+        }
+
+        @keyframes btnPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        .back-btn {
+            background: transparent;
+            border: 2px solid #FF8C00;
+            color: #fff;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 140, 0, 0.2);
+        }
+
+        /* Контейнер для контента */
+        .content {
+            flex: 1;
+        }
+
+        /* Маленькая кнопка фейерверка в самом низу */
+        .firework-btn-container {
+            text-align: center;
+            margin-top: auto;
+            padding-top: 30px;
+            padding-bottom: 10px;
+        }
+
+        .firework-btn {
+            background: rgba(255, 69, 0, 0.2);
+            border: 1px solid #FF8C00;
+            border-radius: 30px;
+            padding: 8px 16px;
+            font-size: 12px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-family: 'Prosto One', sans-serif;
+            letter-spacing: 1px;
+            backdrop-filter: blur(5px);
+        }
+
+        .firework-btn:hover {
+            background: rgba(255, 140, 0, 0.4);
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(255, 69, 0, 0.5);
+        }
+
+        /* Солнечная вспышка */
+        .sun-flare {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(255,215,0,0.8) 0%, rgba(255,140,0,0.4) 50%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.1s;
+        }
+
+        .sun-flare.active {
+            animation: sunFlare 0.5s ease-out forwards;
+        }
+
+        @keyframes sunFlare {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.1);
+            }
+            50% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1.5);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(2);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Солнечная вспышка (будет появляться при нажатии) -->
+    <div id="sunFlare" class="sun-flare"></div>
+
+    <div class="container">
+        <!-- Сияющая звезда над заголовком -->
+        <div class="glowing-star">
+            <span>✨</span>
+        </div>
+
+        <div class="header">
+            <h1>Космическая оплата</h1>
+            <p>выберите валюту</p>
+        </div>
+
+        <!-- МЕНЮ С ВАЛЮТАМИ -->
+        <div id="menu" class="currency-methods">
+            <div class="currency-card" onclick="handleCurrencyClick('rub')">
+                <span class="currency-emoji">🇷🇺</span>
+                <div class="currency-name">RUB</div>
+                <div class="currency-desc">Российский рубль</div>
+            </div>
+            
+            <div class="currency-card" onclick="handleCurrencyClick('byn')">
+                <span class="currency-emoji">🇧🇾</span>
+                <div class="currency-name">BYN</div>
+                <div class="currency-desc">Белорусский рубль</div>
+            </div>
+            
+            <div class="currency-card" onclick="handleCurrencyClick('eur')">
+                <span class="currency-emoji">💶</span>
+                <div class="currency-name">EUR/USD</div>
+                <div class="currency-desc">Евро / Доллар</div>
+            </div>
+        </div>
+
+        <!-- ДЕТАЛИ RUB -->
+        <div id="rub" class="details-panel">
+            <div class="details-title">
+                <span>🇷🇺</span>
+                <span>Российский рубль</span>
+            </div>
+            <div class="details-box">
+                <div class="detail-row">
+                    <span class="detail-label">Переход на платформу</span>
+                    <span class="detail-value">Lava Top</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Статус</span>
+                    <span class="detail-value">✅ Активно</span>
+                </div>
+            </div>
+            <button class="action-btn paid-btn" onclick="openLavaLink()">
+                <span>🚀</span> Перейти к оплате RUB
+            </button>
+            <button class="action-btn back-btn" onclick="backToMenu()">
+                <span>←</span> Назад к валютам
+            </button>
+        </div>
+
+        <!-- ДЕТАЛИ BYN -->
+        <div id="byn" class="details-panel">
+            <div class="details-title">
+                <span>🇧🇾</span>
+                <span>Белорусский рубль</span>
+            </div>
+            <div class="info-message">
+                ⏳ Расчетный счет скоро будет доступен
+            </div>
+            <button class="action-btn back-btn" onclick="backToMenu()">
+                <span>←</span> Назад к валютам
+            </button>
+        </div>
+
+        <!-- ДЕТАЛИ EUR/USD -->
+        <div id="eur" class="details-panel">
+            <div class="details-title">
+                <span>💶</span>
+                <span>Евро / Доллар</span>
+            </div>
+            <div class="info-message">
+                🌐 Ссылка на оплату скоро будет подготовлена. Ожидайте.
+            </div>
+            <button class="action-btn back-btn" onclick="backToMenu()">
+                <span>←</span> Назад к валютам
+            </button>
+        </div>
+
+        <!-- Маленькая кнопка для теста фейерверка в САМОМ НИЗУ -->
+        <div class="firework-btn-container">
+            <button class="firework-btn" onclick="testFireworks()">
+                <span>🎆</span> протестировать фейерверк
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+
+        // Функция для солнечной вспышки
+        function sunFlare() {
+            const flare = document.getElementById('sunFlare');
+            flare.classList.remove('active');
+            void flare.offsetWidth; // перезапуск анимации
+            flare.classList.add('active');
+            
+            // Убираем класс после окончания анимации
+            setTimeout(() => {
+                flare.classList.remove('active');
+            }, 500);
+        }
+
+        // Функция для фейерверка
+        function launchFireworks() {
+            const duration = 2 * 1000;
+            const animationEnd = Date.now() + duration;
+            const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 1000 };
+
+            function randomInRange(min, max) {
+                return Math.random() * (max - min) + min;
+            }
+
+            const interval = setInterval(function() {
+                const timeLeft = animationEnd - Date.now();
+
+                if (timeLeft <= 0) {
+                    return clearInterval(interval);
+                }
+
+                const particleCount = 50 * (timeLeft / duration);
+                
+                // Оранжево-золотые конфетти (солнечные)
+                confetti(Object.assign({}, defaults, {
+                    particleCount,
+                    origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 },
+                    colors: ['#FF4500', '#FF8C00', '#FFD700', '#FF6347']
+                }));
+                
+                // Фиолетовые конфетти
+                confetti(Object.assign({}, defaults, {
+                    particleCount,
+                    origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 },
+                    colors: ['#8A2BE2', '#9370DB', '#BA55D3', '#DA70D6']
+                }));
+                
+                // Синие конфетти
+                confetti(Object.assign({}, defaults, {
+                    particleCount: particleCount / 2,
+                    origin: { x: 0.5, y: 0.5 },
+                    colors: ['#1E3C72', '#2A5298', '#4169E1', '#1E90FF']
+                }));
+            }, 250);
+        }
+
+        // Тестовый фейерверк (маленькая кнопка)
+        function testFireworks() {
+            sunFlare(); // солнечная вспышка
+            launchFireworks();
+        }
+
+        // Обработка клика по валюте
+        function handleCurrencyClick(currency) {
+            sunFlare(); // солнечная вспышка при нажатии
+            
+            if (currency === 'rub') {
+                openLavaLink();
+            } else {
+                showCurrency(currency);
+            }
+        }
+
+        // Показать детали валюты
+        function showCurrency(currency) {
+            document.getElementById('menu').style.display = 'none';
+            document.getElementById('rub').classList.remove('show');
+            document.getElementById('byn').classList.remove('show');
+            document.getElementById('eur').classList.remove('show');
+            
+            document.getElementById(currency).classList.add('show');
+            
+            // Маленький фейерверк при выборе валюты
+            confetti({
+                particleCount: 30,
+                spread: 50,
+                origin: { y: 0.5 },
+                colors: ['#FF4500', '#FF8C00', '#8A2BE2']
+            });
+        }
+
+        // Открыть ссылку Lava Top для RUB
+        function openLavaLink() {
+            sunFlare();
+            launchFireworks(); // праздничный фейерверк
+            
+            // Открываем ссылку
+            window.open('https://app.lava.top/veratonika?tabId=products&sort=published', '_blank');
+            
+            // Отправляем данные в бота
+            tg.sendData(JSON.stringify({
+                type: 'payment',
+                currency: 'rub',
+                action: 'redirect_to_lava'
+            }));
+        }
+
+        // Вернуться в меню
+        function backToMenu() {
+            sunFlare(); // солнечная вспышка при возврате
+            document.getElementById('menu').style.display = 'flex';
+            document.getElementById('rub').classList.remove('show');
+            document.getElementById('byn').classList.remove('show');
+            document.getElementById('eur').classList.remove('show');
+        }
+
+        // Функция для копирования (оставим на будущее)
+        function copyText(text) {
+            navigator.clipboard.writeText(text);
+            sunFlare();
+            tg.HapticFeedback.notificationOccurred('success');
+            
+            confetti({
+                particleCount: 50,
+                spread: 70,
+                origin: { y: 0.6 },
+                colors: ['#FF4500', '#FFD700']
+            });
+            
+            showNotification('✨ Скопировано! ✨');
+        }
+
+        // Уведомление
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: linear-gradient(135deg, #FF4500, #8A2BE2);
+                color: white;
+                padding: 15px 30px;
+                border-radius: 30px;
+                font-size: 16px;
+                box-shadow: 0 0 30px #FF8C00;
+                z-index: 1000;
+                animation: notificationFloat 2s ease-out forwards;
+                border: 1px solid rgba(255,215,0,0.3);
+                font-family: 'Prosto One', sans-serif;
+            `;
+            notification.innerHTML = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 2000);
+        }
+
+        // Стиль для уведомления
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes notificationFloat {
+                0% {
+                    opacity: 0;
+                    transform: translateX(-50%) translateY(-20px);
+                }
+                20% {
+                    opacity: 1;
+                    transform: translateX(-50%) translateY(0);
+                }
+                80% {
+                    opacity: 1;
+                    transform: translateX(-50%) translateY(0);
+                }
+                100% {
+                    opacity: 0;
+                    transform: translateX(-50%) translateY(-20px);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
