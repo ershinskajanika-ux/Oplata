@@ -51,7 +51,6 @@
         .star {
             position: absolute;
             background: white;
-            border-radius: 50%;
             animation: floatStar linear infinite;
             opacity: 0;
         }
@@ -73,29 +72,77 @@
             }
         }
 
-        /* Волна от касания */
+        /* Волна от касания с лучами */
         .ripple {
             position: fixed;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.3);
-            transform: scale(0);
-            animation: ripple-animation 0.8s ease-out;
             pointer-events: none;
             z-index: 9999;
         }
 
-        @keyframes ripple-animation {
+        .ripple-wave {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15);
+            transform: translate(-50%, -50%) scale(0);
+            animation: ripple-wave 1.8s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+            width: 100px;
+            height: 100px;
+            left: 0;
+            top: 0;
+            box-shadow: 0 0 40px rgba(255, 255, 255, 0.3);
+        }
+
+        @keyframes ripple-wave {
             0% {
-                transform: scale(0);
-                opacity: 0.5;
+                transform: translate(-50%, -50%) scale(0);
+                opacity: 0.6;
+                filter: blur(2px);
             }
-            50% {
-                transform: scale(20);
+            30% {
+                opacity: 0.5;
+                filter: blur(4px);
+            }
+            60% {
                 opacity: 0.3;
+                filter: blur(8px);
             }
             100% {
-                transform: scale(40);
+                transform: translate(-50%, -50%) scale(40);
                 opacity: 0;
+                filter: blur(20px);
+            }
+        }
+
+        .ripple-ray {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            transform-origin: center;
+            animation: ripple-ray 1.8s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+        }
+
+        @keyframes ripple-ray {
+            0% {
+                transform: translate(-50%, -50%) scale(0) rotate(var(--angle));
+                opacity: 0.4;
+                width: 2px;
+                height: 30px;
+            }
+            30% {
+                opacity: 0.3;
+                width: 3px;
+                height: 60px;
+            }
+            60% {
+                opacity: 0.15;
+                width: 4px;
+                height: 90px;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(20) rotate(var(--angle));
+                opacity: 0;
+                width: 5px;
+                height: 120px;
             }
         }
 
@@ -426,7 +473,7 @@
             background: rgba(255, 255, 255, 0.02);
         }
 
-        /* Кнопка теста */
+        /* Кнопка теста звезд */
         .firework-btn-container {
             text-align: center;
             margin-top: auto;
@@ -589,7 +636,7 @@
             </div>
         </div>
 
-        <!-- Маленькая кнопка для теста звезд -->
+        <!-- Кнопка для теста звезд -->
         <div class="firework-btn-container">
             <button class="firework-btn" onclick="createRipple(event); launchStars()">
                 <span>✨</span> протестировать звезды
@@ -611,9 +658,18 @@
                 const star = document.createElement('div');
                 star.className = 'star';
                 
-                const size = Math.random() * 3 + 1;
+                // Разный размер
+                const size = Math.random() * 4 + 1;
                 star.style.width = size + 'px';
                 star.style.height = size + 'px';
+                
+                // Разная форма (округлые и звездообразные)
+                if (Math.random() > 0.5) {
+                    star.style.borderRadius = '50%';
+                } else {
+                    star.style.borderRadius = '20% 80% 50% 50% / 30% 40% 60% 70%';
+                    star.style.transform = `rotate(${Math.random() * 360}deg)`;
+                }
                 
                 star.style.left = Math.random() * 100 + '%';
                 
@@ -628,39 +684,43 @@
 
         createStars();
 
-        // Функция для создания волны (ripple)
+        // Функция для создания волны с лучами
         function createRipple(event) {
-            const ripple = document.createElement('div');
-            ripple.className = 'ripple';
-            
             const x = event.clientX;
             const y = event.clientY;
             
+            // Контейнер для волны
+            const ripple = document.createElement('div');
+            ripple.className = 'ripple';
             ripple.style.left = x + 'px';
             ripple.style.top = y + 'px';
-            ripple.style.width = '20px';
-            ripple.style.height = '20px';
+            
+            // Основная волна
+            const wave = document.createElement('div');
+            wave.className = 'ripple-wave';
+            ripple.appendChild(wave);
+            
+            // Лучи (8 лучей)
+            for (let i = 0; i < 8; i++) {
+                const ray = document.createElement('div');
+                ray.className = 'ripple-ray';
+                const angle = (i * 45) + 'deg';
+                ray.style.setProperty('--angle', angle);
+                ripple.appendChild(ray);
+            }
             
             document.body.appendChild(ripple);
             
             setTimeout(() => {
                 ripple.remove();
-            }, 800);
+            }, 1800);
         }
 
         // Функция для разлетающихся звездочек
         function launchStars() {
             const duration = 2 * 1000;
             const animationEnd = Date.now() + duration;
-            const defaults = { 
-                startVelocity: 25, 
-                spread: 360, 
-                ticks: 60, 
-                zIndex: 1000,
-                shapes: ['star'],
-                colors: ['#FFD700', '#FFA500', '#FF8C00', '#FFFACD', '#FFE4B5']
-            };
-
+            
             function randomInRange(min, max) {
                 return Math.random() * (max - min) + min;
             }
@@ -674,21 +734,23 @@
 
                 const particleCount = 30 * (timeLeft / duration);
                 
-                confetti(Object.assign({}, defaults, {
-                    particleCount,
-                    origin: { x: randomInRange(0.2, 0.4), y: Math.random() - 0.2 },
-                }));
-                
-                confetti(Object.assign({}, defaults, {
-                    particleCount,
-                    origin: { x: randomInRange(0.6, 0.8), y: Math.random() - 0.2 },
-                }));
-                
-                confetti(Object.assign({}, defaults, {
-                    particleCount: particleCount / 2,
-                    origin: { x: 0.5, y: 0.5 },
-                }));
-            }, 200);
+                // Белые звезды разного размера
+                for (let i = 0; i < 3; i++) {
+                    confetti({
+                        particleCount: particleCount,
+                        startVelocity: randomInRange(20, 35),
+                        spread: randomInRange(60, 120),
+                        origin: { 
+                            x: randomInRange(0.2, 0.8), 
+                            y: randomInRange(0.2, 0.6) 
+                        },
+                        colors: ['#FFFFFF', '#F0F0F0', '#E0E0E0', '#D0D0D0'],
+                        shapes: ['star', 'circle'],
+                        scalar: randomInRange(0.8, 1.5), // Разный размер
+                        ticks: 100
+                    });
+                }
+            }, 150);
         }
 
         // Текущий выбранный продукт
