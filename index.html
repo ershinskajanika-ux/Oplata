@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Космическая оплата</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1"></script>
     <style>
         * {
             margin: 0;
@@ -22,8 +23,8 @@
             color: #ffffff;
         }
 
-        /* Анимированные звезды */
-        .stars, .twinkling, .clouds {
+        /* Звездное небо */
+        .stars, .twinkling {
             position: fixed;
             top: 0;
             left: 0;
@@ -31,29 +32,19 @@
             bottom: 0;
             width: 100%;
             height: 100%;
-            display: block;
-            z-index: -1;
+            z-index: -2;
         }
 
         .stars {
             background: #000 url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMiIgaGVpZ2h0PSIyIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxjaXJjbGUgY3g9IjEiIGN5PSIxIiByPSIxIiBmaWxsPSJ3aGl0ZSIgb3BhY2l0eT0iMC4zIi8+PC9zdmc4') repeat;
             background-size: 2px 2px;
             animation: stars 200s linear infinite;
-            opacity: 0.8;
         }
 
         .twinkling {
             background: transparent url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNCIgaGVpZ2h0PSI0IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxjaXJjbGUgY3g9IjIiIGN5PSIyIiByPSIxLjUiIGZpbGw9IndoaXRlIiBvcGFjaXR5PSIwLjUiLz48L3N2Zz4=') repeat;
             background-size: 4px 4px;
             animation: twinkling 4s linear infinite;
-            opacity: 0.3;
-        }
-
-        .clouds {
-            background: transparent url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cmFkaWFsR3JhZGllbnQgaWQ9ImciPjxzdG9wIG9mZnNldD0iMCUiIHN0b3AtY29sb3I9IiM0YzNhZmYiIHN0b3Atb3BhY2l0eT0iMC4yIi8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdG9wLWNvbG9yPSIjMDAwMDAwIiBzdG9wLW9wYWNpdHk9IjAiLz48L3JhZGlhbEdyYWRpZW50PjwvZGVmcz48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0MCIgZmlsbD0idXJsKCNnKSIvPjwvc3ZnPg==') repeat;
-            background-size: 100px 100px;
-            animation: clouds 20s linear infinite;
-            opacity: 0.15;
         }
 
         @keyframes stars {
@@ -67,16 +58,9 @@
             100% { opacity: 0.2; }
         }
 
-        @keyframes clouds {
-            0% { transform: translateX(0) translateY(0); }
-            100% { transform: translateX(-1000px) translateY(-200px); }
-        }
-
         /* Падающие звезды */
         .shooting-star {
             position: fixed;
-            top: 50%;
-            left: 50%;
             width: 2px;
             height: 2px;
             background: white;
@@ -99,15 +83,31 @@
                 opacity: 1;
                 width: 2px;
             }
-            20% {
-                width: 100px;
-                opacity: 0.8;
-            }
+            20% { width: 100px; opacity: 0.8; }
             100% {
                 transform: translateX(500px) translateY(500px) rotate(45deg);
                 opacity: 0;
                 width: 150px;
             }
+        }
+
+        /* Планета */
+        .planet {
+            position: fixed;
+            bottom: -100px;
+            right: -50px;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle at 30% 30%, #4a2b7a, #1a0b2e);
+            border-radius: 50%;
+            box-shadow: 0 0 50px rgba(106, 13, 173, 0.5);
+            z-index: -1;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
         }
 
         .container {
@@ -117,50 +117,7 @@
             z-index: 1;
         }
 
-        /* Планета в фоне */
-        .planet {
-            position: fixed;
-            bottom: -100px;
-            right: -50px;
-            width: 300px;
-            height: 300px;
-            background: radial-gradient(circle at 30% 30%, #4a2b7a, #1a0b2e);
-            border-radius: 50%;
-            box-shadow: 0 0 50px rgba(106, 13, 173, 0.5), inset -20px -20px 50px rgba(0,0,0,0.5);
-            z-index: -1;
-            animation: float 20s ease-in-out infinite;
-        }
-
-        .planet::before {
-            content: '';
-            position: absolute;
-            top: 20%;
-            left: 20%;
-            width: 60px;
-            height: 60px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 50%;
-            box-shadow: 0 0 20px rgba(255,255,255,0.2);
-        }
-
-        .planet::after {
-            content: '';
-            position: absolute;
-            bottom: 30%;
-            right: 20%;
-            width: 40px;
-            height: 40px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 50%;
-            box-shadow: 0 0 15px rgba(255,215,0,0.3);
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(5deg); }
-        }
-
-        /* Неоновый заголовок */
+        /* Заголовок */
         .header {
             text-align: center;
             margin-bottom: 40px;
@@ -178,65 +135,42 @@
             background: linear-gradient(45deg, #fff, #e0b0ff, #b57cff);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            animation: titleFloat 3s ease-in-out infinite;
-        }
-
-        @keyframes titleFloat {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
         }
 
         .header p {
             font-size: 16px;
-            opacity: 0.9;
             color: #c0b0ff;
             letter-spacing: 2px;
         }
 
-        /* Карточки с космическим стеклом */
-        .payment-methods {
+        /* Карточки валют */
+        .currency-methods {
             display: flex;
-            flex-direction: column;
             gap: 15px;
             margin-bottom: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
         }
 
-        .method-card {
+        .currency-card {
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(15px);
             border: 1px solid rgba(138, 43, 226, 0.3);
             border-radius: 25px;
             padding: 20px;
             cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex;
-            align-items: center;
-            gap: 15px;
+            transition: all 0.4s;
+            flex: 1;
+            min-width: 100px;
+            text-align: center;
             animation: cardAppear 0.6s ease-out;
             animation-fill-mode: both;
             box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
-            position: relative;
-            overflow: hidden;
         }
 
-        .method-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-            transition: left 0.5s;
-        }
-
-        .method-card:hover::before {
-            left: 100%;
-        }
-
-        .method-card:nth-child(1) { animation-delay: 0.1s; }
-        .method-card:nth-child(2) { animation-delay: 0.2s; }
-        .method-card:nth-child(3) { animation-delay: 0.3s; }
+        .currency-card:nth-child(1) { animation-delay: 0.1s; }
+        .currency-card:nth-child(2) { animation-delay: 0.2s; }
+        .currency-card:nth-child(3) { animation-delay: 0.3s; }
 
         @keyframes cardAppear {
             from {
@@ -249,57 +183,33 @@
             }
         }
 
-        .method-card:hover {
-            transform: translateY(-5px) scale(1.02);
+        .currency-card:hover {
+            transform: translateY(-5px) scale(1.05);
             border-color: #8a2be2;
             box-shadow: 0 20px 40px rgba(138, 43, 226, 0.3);
         }
 
-        .method-emoji {
+        .currency-emoji {
             font-size: 40px;
-            width: 70px;
-            height: 70px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(145deg, #2a1b4b, #1a0b3a);
-            border-radius: 35px;
-            border: 1px solid rgba(138, 43, 226, 0.5);
-            animation: emojiPulse 2s infinite;
+            margin-bottom: 10px;
+            display: block;
         }
 
-        @keyframes emojiPulse {
-            0%, 100% { box-shadow: 0 0 20px #8a2be2; }
-            50% { box-shadow: 0 0 40px #4b0082; }
-        }
-
-        .method-info {
-            flex: 1;
-        }
-
-        .method-title {
-            font-size: 18px;
+        .currency-name {
+            font-size: 24px;
             font-weight: 600;
             margin-bottom: 5px;
-            color: #fff;
+            background: linear-gradient(45deg, #fff, #e0b0ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        .method-subtitle {
-            font-size: 14px;
+        .currency-desc {
+            font-size: 12px;
             color: #b0a0ff;
         }
 
-        .method-arrow {
-            font-size: 24px;
-            color: #8a2be2;
-            transition: transform 0.3s;
-        }
-
-        .method-card:hover .method-arrow {
-            transform: translateX(10px) scale(1.2);
-        }
-
-        /* Детали с космическим дизайном */
+        /* Панель с деталями */
         .details-panel {
             background: rgba(10, 5, 30, 0.7);
             backdrop-filter: blur(20px);
@@ -310,24 +220,6 @@
             animation: galaxyAppear 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
             display: none;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .details-panel::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(138,43,226,0.1) 0%, transparent 70%);
-            animation: rotate 20s linear infinite;
-        }
-
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
         }
 
         .details-panel.show {
@@ -354,8 +246,6 @@
             gap: 10px;
             color: #fff;
             text-shadow: 0 0 15px #8a2be2;
-            position: relative;
-            z-index: 1;
         }
 
         .details-box {
@@ -364,9 +254,6 @@
             padding: 20px;
             margin-bottom: 20px;
             border: 1px solid rgba(138, 43, 226, 0.2);
-            position: relative;
-            z-index: 1;
-            backdrop-filter: blur(5px);
         }
 
         .detail-row {
@@ -374,12 +261,6 @@
             justify-content: space-between;
             padding: 15px 0;
             border-bottom: 1px solid rgba(138, 43, 226, 0.2);
-            animation: rowGlow 2s ease-in-out infinite;
-        }
-
-        @keyframes rowGlow {
-            0%, 100% { text-shadow: 0 0 5px transparent; }
-            50% { text-shadow: 0 0 10px #8a2be2; }
         }
 
         .detail-row:last-child {
@@ -398,12 +279,9 @@
             word-break: break-all;
             text-align: right;
             max-width: 60%;
-            background: linear-gradient(45deg, #fff, #e0b0ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
         }
 
-        /* Космические кнопки */
+        /* Кнопки */
         .action-btn {
             background: linear-gradient(135deg, #6a5acd, #4b0082);
             border: none;
@@ -420,36 +298,12 @@
             justify-content: center;
             gap: 10px;
             transition: all 0.3s;
-            position: relative;
-            overflow: hidden;
-            z-index: 1;
             border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .action-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.5s;
-            z-index: -1;
-        }
-
-        .action-btn:hover::before {
-            left: 100%;
         }
 
         .action-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 30px #4b0082;
-            border-color: #9370db;
-        }
-
-        .action-btn:active {
-            transform: translateY(2px);
         }
 
         .copy-btn {
@@ -458,6 +312,12 @@
 
         .paid-btn {
             background: linear-gradient(135deg, #32cd32, #228b22);
+            animation: btnPulse 2s infinite;
+        }
+
+        @keyframes btnPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
         }
 
         .back-btn {
@@ -470,64 +330,10 @@
             background: rgba(106, 90, 205, 0.2);
         }
 
-        /* Анимация для кнопок */
-        @keyframes btnPulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-
-        .paid-btn {
-            animation: btnPulse 2s infinite;
-        }
-
-        /* Неоновые линии */
-        .neon-line {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #8a2be2, #4b0082, transparent);
-            animation: neonMove 3s linear infinite;
-        }
-
-        @keyframes neonMove {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
-        }
-
-        /* Мерцающие точки */
-        .twinkling-dots {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: -1;
-        }
-
-        .twinkling-dots::before,
-        .twinkling-dots::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: radial-gradient(circle at 30% 50%, rgba(255,255,255,0.1) 1px, transparent 1px);
-            background-size: 50px 50px;
-            animation: twinkle 4s ease-in-out infinite;
-        }
-
-        .twinkling-dots::after {
-            background-position: 25px 25px;
-            animation-delay: -2s;
-        }
-
-        @keyframes twinkle {
-            0%, 100% { opacity: 0.2; }
-            50% { opacity: 0.5; }
+        /* Кнопка фейерверка для теста */
+        .firework-btn {
+            background: linear-gradient(135deg, #ff1493, #9400d3);
+            margin-top: 20px;
         }
     </style>
 </head>
@@ -535,7 +341,6 @@
     <!-- Звездное небо -->
     <div class="stars"></div>
     <div class="twinkling"></div>
-    <div class="clouds"></div>
     
     <!-- Падающие звезды -->
     <div class="shooting-star"></div>
@@ -546,53 +351,44 @@
     
     <!-- Планета -->
     <div class="planet"></div>
-    
-    <!-- Мерцающие точки -->
-    <div class="twinkling-dots"></div>
 
     <div class="container">
-        <!-- Неоновый заголовок -->
         <div class="header">
-            <div class="neon-line"></div>
-            <h1>🚀 КОСМИЧЕСКАЯ ОПЛАТА</h1>
-            <p>✧ ВЫБЕРИТЕ СПОСОБ ОПЛАТЫ ✧</p>
+            <h1>🌌 КОСМИЧЕСКАЯ ОПЛАТА</h1>
+            <p>✧ ВЫБЕРИТЕ ВАЛЮТУ ✧</p>
         </div>
 
-        <!-- МЕНЮ -->
-        <div id="menu" class="payment-methods">
-            <div class="method-card" onclick="showCard()">
-                <span class="method-emoji">💳</span>
-                <div class="method-info">
-                    <div class="method-title">Банковская карта</div>
-                    <div class="method-subtitle">Visa, MasterCard, МИР</div>
-                </div>
-                <span class="method-arrow">✨</span>
+        <!-- МЕНЮ С ВАЛЮТАМИ -->
+        <div id="menu" class="currency-methods">
+            <div class="currency-card" onclick="showCurrency('rub')">
+                <span class="currency-emoji">🇷🇺</span>
+                <div class="currency-name">RUB</div>
+                <div class="currency-desc">Российский рубль</div>
             </div>
             
-            <div class="method-card" onclick="showCrypto()">
-                <span class="method-emoji">₿</span>
-                <div class="method-info">
-                    <div class="method-title">Криптовалюта</div>
-                    <div class="method-subtitle">USDT (TRC20)</div>
-                </div>
-                <span class="method-arrow">✨</span>
+            <div class="currency-card" onclick="showCurrency('byn')">
+                <span class="currency-emoji">🇧🇾</span>
+                <div class="currency-name">BYN</div>
+                <div class="currency-desc">Белорусский рубль</div>
             </div>
             
-            <div class="method-card" onclick="showPhone()">
-                <span class="method-emoji">📱</span>
-                <div class="method-info">
-                    <div class="method-title">Перевод по номеру</div>
-                    <div class="method-subtitle">СБП / Перевод</div>
-                </div>
-                <span class="method-arrow">✨</span>
+            <div class="currency-card" onclick="showCurrency('eur')">
+                <span class="currency-emoji">💶</span>
+                <div class="currency-name">EUR/USD</div>
+                <div class="currency-desc">Евро / Доллар</div>
             </div>
         </div>
 
-        <!-- ДЕТАЛИ КАРТЫ -->
-        <div id="card" class="details-panel">
+        <!-- Кнопка для теста фейерверка (можно удалить потом) -->
+        <button class="action-btn firework-btn" onclick="launchFireworks()">
+            🎆 Протестировать фейерверк 🎆
+        </button>
+
+        <!-- ДЕТАЛИ RUB -->
+        <div id="rub" class="details-panel">
             <div class="details-title">
-                <span>💳</span>
-                <span>Галактическая карта</span>
+                <span>🇷🇺</span>
+                <span>Российский рубль</span>
             </div>
             <div class="details-box">
                 <div class="detail-row">
@@ -601,83 +397,98 @@
                 </div>
                 <div class="detail-row">
                     <span class="detail-label">Получатель</span>
-                    <span class="detail-value">Иван И.</span>
+                    <span class="detail-value">Иван Иванов</span>
                 </div>
                 <div class="detail-row">
-                    <span class="detail-label">Космобанк</span>
-                    <span class="detail-value">🌟 Галактический</span>
+                    <span class="detail-label">Банк</span>
+                    <span class="detail-value">Сбербанк</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Комиссия</span>
+                    <span class="detail-value">0%</span>
                 </div>
             </div>
-            <button class="action-btn copy-btn" onclick="copyText('2200 1234 5678 9012')">
-                <span>📋</span> Копировать номер
+            <button class="action-btn copy-btn" onclick="copyWithFireworks('2200 1234 5678 9012')">
+                <span>📋</span> Копировать реквизиты
             </button>
-            <button class="action-btn paid-btn" onclick="sendPayment('card')">
-                <span>✅</span> Я оплатил в космосе
+            <button class="action-btn paid-btn" onclick="payWithFireworks('rub')">
+                <span>✅</span> Я оплатил
             </button>
             <button class="action-btn back-btn" onclick="backToMenu()">
-                <span>←</span> Вернуться к звездам
+                <span>←</span> Назад к валютам
             </button>
         </div>
 
-        <!-- ДЕТАЛИ КРИПТЫ -->
-        <div id="crypto" class="details-panel">
+        <!-- ДЕТАЛИ BYN -->
+        <div id="byn" class="details-panel">
             <div class="details-title">
-                <span>₿</span>
-                <span>Крипто-галактика</span>
+                <span>🇧🇾</span>
+                <span>Белорусский рубль</span>
             </div>
             <div class="details-box">
                 <div class="detail-row">
-                    <span class="detail-label">Сеть</span>
-                    <span class="detail-value">✨ TRC20</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Адрес кошелька</span>
-                    <span class="detail-value">TXYZ123456789abcdef</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Мин. сумма</span>
-                    <span class="detail-value">10 USDT</span>
-                </div>
-            </div>
-            <button class="action-btn copy-btn" onclick="copyText('TXYZ123456789abcdef')">
-                <span>📋</span> Копировать адрес
-            </button>
-            <button class="action-btn paid-btn" onclick="sendPayment('crypto')">
-                <span>✅</span> Я отправил в космос
-            </button>
-            <button class="action-btn back-btn" onclick="backToMenu()">
-                <span>←</span> Вернуться к звездам
-            </button>
-        </div>
-
-        <!-- ДЕТАЛИ ТЕЛЕФОНА -->
-        <div id="phone" class="details-panel">
-            <div class="details-title">
-                <span>📱</span>
-                <span>Межгалактический перевод</span>
-            </div>
-            <div class="details-box">
-                <div class="detail-row">
-                    <span class="detail-label">Номер телефона</span>
-                    <span class="detail-value">+7 999 123-45-67</span>
+                    <span class="detail-label">Номер карты</span>
+                    <span class="detail-value">9112 3456 7890 1234</span>
                 </div>
                 <div class="detail-row">
                     <span class="detail-label">Получатель</span>
-                    <span class="detail-value">Иван И.</span>
+                    <span class="detail-value">Иван Иванов</span>
                 </div>
                 <div class="detail-row">
-                    <span class="detail-label">Система</span>
-                    <span class="detail-value">🌍 СБП</span>
+                    <span class="detail-label">Банк</span>
+                    <span class="detail-value">Беларусбанк</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Комиссия</span>
+                    <span class="detail-value">0.5%</span>
                 </div>
             </div>
-            <button class="action-btn copy-btn" onclick="copyText('+79991234567')">
-                <span>📋</span> Копировать номер
+            <button class="action-btn copy-btn" onclick="copyWithFireworks('9112 3456 7890 1234')">
+                <span>📋</span> Копировать реквизиты
             </button>
-            <button class="action-btn paid-btn" onclick="sendPayment('phone')">
-                <span>✅</span> Я перевел в космос
+            <button class="action-btn paid-btn" onclick="payWithFireworks('byn')">
+                <span>✅</span> Я оплатил
             </button>
             <button class="action-btn back-btn" onclick="backToMenu()">
-                <span>←</span> Вернуться к звездам
+                <span>←</span> Назад к валютам
+            </button>
+        </div>
+
+        <!-- ДЕТАЛИ EUR/USD -->
+        <div id="eur" class="details-panel">
+            <div class="details-title">
+                <span>💶</span>
+                <span>Евро / Доллар</span>
+            </div>
+            <div class="details-box">
+                <div class="detail-row">
+                    <span class="detail-label">EUR (IBAN)</span>
+                    <span class="detail-value">DE89 3704 0044 0532 0130 00</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">USD (IBAN)</span>
+                    <span class="detail-value">US12 3456 7890 1234 5678 90</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Получатель</span>
+                    <span class="detail-value">Ivan Ivanov</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">SWIFT</span>
+                    <span class="detail-value">SBERUSMM</span>
+                </div>
+            </div>
+            <button class="action-btn copy-btn" onclick="copyWithFireworks('DE89370400440532013000')">
+                <span>📋</span> Копировать EUR
+            </button>
+            <button class="action-btn copy-btn" onclick="copyWithFireworks('US12345678901234567890')">
+                <span>📋</span> Копировать USD
+            </button>
+            <button class="action-btn paid-btn" onclick="payWithFireworks('eur')">
+                <span>✅</span> Я оплатил
+            </button>
+            <button class="action-btn back-btn" onclick="backToMenu()">
+                <span>←</span> Назад к валютам
             </button>
         </div>
     </div>
@@ -687,33 +498,86 @@
         tg.ready();
         tg.expand();
 
-        function showCard() {
-            document.getElementById('menu').style.display = 'none';
-            document.getElementById('card').classList.add('show');
+        // Функция для фейерверка
+        function launchFireworks() {
+            const duration = 3 * 1000;
+            const animationEnd = Date.now() + duration;
+            const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 1000 };
+
+            function randomInRange(min, max) {
+                return Math.random() * (max - min) + min;
+            }
+
+            const interval = setInterval(function() {
+                const timeLeft = animationEnd - Date.now();
+
+                if (timeLeft <= 0) {
+                    return clearInterval(interval);
+                }
+
+                const particleCount = 50 * (timeLeft / duration);
+                
+                // Фиолетовые конфетти (космические)
+                confetti(Object.assign({}, defaults, {
+                    particleCount,
+                    origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 },
+                    colors: ['#8a2be2', '#4b0082', '#9370db', '#6a5acd']
+                }));
+                
+                // Синие конфетти
+                confetti(Object.assign({}, defaults, {
+                    particleCount,
+                    origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 },
+                    colors: ['#4169e1', '#1e90ff', '#00bfff', '#87cefa']
+                }));
+                
+                // Золотые конфетти
+                setTimeout(() => {
+                    confetti(Object.assign({}, defaults, {
+                        particleCount: particleCount / 2,
+                        origin: { x: 0.5, y: 0.5 },
+                        colors: ['#ffd700', '#ffa500', '#ff8c00', '#ff7f50']
+                    }));
+                }, 100);
+            }, 250);
         }
 
-        function showCrypto() {
-            document.getElementById('menu').style.display = 'none';
-            document.getElementById('crypto').classList.add('show');
-        }
-
-        function showPhone() {
-            document.getElementById('menu').style.display = 'none';
-            document.getElementById('phone').classList.add('show');
-        }
-
-        function backToMenu() {
-            document.getElementById('menu').style.display = 'flex';
-            document.getElementById('card').classList.remove('show');
-            document.getElementById('crypto').classList.remove('show');
-            document.getElementById('phone').classList.remove('show');
-        }
-
-        function copyText(text) {
+        // Функция для копирования с фейерверком
+        function copyWithFireworks(text) {
             navigator.clipboard.writeText(text);
             tg.HapticFeedback.notificationOccurred('success');
             
-            // Создаем космическое уведомление
+            // Маленький фейерверк при копировании
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 },
+                colors: ['#8a2be2', '#4b0082', '#ffd700']
+            });
+            
+            showCosmicNotification('✨ Скопировано в космос! ✨');
+        }
+
+        // Функция для оплаты с фейерверком
+        function payWithFireworks(currency) {
+            // Грандиозный фейерверк!
+            launchFireworks();
+            
+            // Отправляем данные в бота
+            tg.sendData(JSON.stringify({
+                type: 'payment',
+                currency: currency
+            }));
+            
+            // Показываем сообщение
+            setTimeout(() => {
+                alert('🚀 Спасибо за оплату! Фейерверк в вашу честь! 🎆');
+                tg.close();
+            }, 1500);
+        }
+
+        // Космическое уведомление
+        function showCosmicNotification(message) {
             const notification = document.createElement('div');
             notification.style.cssText = `
                 position: fixed;
@@ -730,7 +594,7 @@
                 animation: notificationFloat 2s ease-out forwards;
                 border: 1px solid rgba(255,255,255,0.3);
             `;
-            notification.innerHTML = '✨ Скопировано в космос! ✨';
+            notification.innerHTML = message;
             document.body.appendChild(notification);
             
             setTimeout(() => {
@@ -738,14 +602,30 @@
             }, 2000);
         }
 
-        function sendPayment(method) {
-            tg.sendData(JSON.stringify({
-                type: 'payment',
-                method: method
-            }));
+        // Показать детали валюты
+        function showCurrency(currency) {
+            document.getElementById('menu').style.display = 'none';
+            document.getElementById('rub').classList.remove('show');
+            document.getElementById('byn').classList.remove('show');
+            document.getElementById('eur').classList.remove('show');
             
-            alert('🚀 Спасибо! Платеж улетел в космос и будет проверен!');
-            tg.close();
+            document.getElementById(currency).classList.add('show');
+            
+            // Маленький фейерверк при выборе валюты
+            confetti({
+                particleCount: 50,
+                spread: 50,
+                origin: { y: 0.5 },
+                colors: ['#8a2be2', '#4b0082']
+            });
+        }
+
+        // Вернуться в меню
+        function backToMenu() {
+            document.getElementById('menu').style.display = 'flex';
+            document.getElementById('rub').classList.remove('show');
+            document.getElementById('byn').classList.remove('show');
+            document.getElementById('eur').classList.remove('show');
         }
 
         // Добавляем стиль для уведомления
