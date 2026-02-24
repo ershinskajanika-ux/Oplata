@@ -23,10 +23,9 @@
             padding: 15px;
             position: relative;
             overflow-x: hidden;
-            /* Переливающийся градиент: оранжевый, фиолетовый, глубокий синий */
             background: linear-gradient(-45deg, #FF4E00, #8A2BE2, #1E3C72, #2A5298);
             background-size: 400% 400%;
-            animation: gradient 10s ease infinite;
+            animation: gradient 15s ease infinite;
             color: #ffffff;
             display: flex;
             flex-direction: column;
@@ -36,6 +35,48 @@
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
+        }
+
+        /* Анимированные звезды на фоне */
+        .stars-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+            animation: floatStar linear infinite;
+            opacity: 0;
+        }
+
+        @keyframes floatStar {
+            0% {
+                transform: translateY(100vh) translateX(0) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) translateX(100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.5); }
         }
 
         .container {
@@ -52,12 +93,14 @@
         /* Сияющая звезда над заголовком */
         .glowing-star {
             text-align: center;
-            margin-bottom: 5px; /* Уменьшили отступ */
+            margin-bottom: 5px;
             animation: starGlow 2s ease-in-out infinite;
+            position: relative;
+            z-index: 3;
         }
 
         .glowing-star span {
-            font-size: 48px; /* Чуть уменьшили звезду */
+            font-size: 48px;
             display: inline-block;
             filter: drop-shadow(0 0 20px #FFD700);
             animation: starRotate 3s linear infinite;
@@ -77,14 +120,16 @@
 
         .header {
             text-align: center;
-            margin-bottom: 15px; /* Уменьшили отступ */
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 3;
         }
 
         .header h1 {
             font-family: 'Viaoda Libre', cursive;
-            font-size: 32px; /* Чуть уменьшили */
-            margin-bottom: 2px; /* Минимальный отступ */
-            line-height: 1.2; /* Межстрочный интервал */
+            font-size: 32px;
+            margin-bottom: 2px;
+            line-height: 1.2;
             background: linear-gradient(45deg, #fff, #FFD700, #FFA500);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -93,15 +138,17 @@
         }
 
         .question-title {
-            font-family: 'Montserrat', sans-serif; /* Без засечек */
+            font-family: 'Montserrat', sans-serif;
             font-size: 20px;
             font-weight: 500;
             text-align: center;
-            margin-bottom: 15px; /* Уменьшили отступ */
+            margin-bottom: 15px;
             color: #FFE4B5;
             text-shadow: 0 0 15px #FF8C00;
             line-height: 1.3;
             letter-spacing: 0.5px;
+            position: relative;
+            z-index: 3;
         }
 
         /* Карточки продуктов - в одну строку */
@@ -110,13 +157,14 @@
             gap: 8px;
             margin-bottom: 15px;
             justify-content: center;
-            flex-wrap: nowrap; /* Запрещаем перенос */
-            overflow-x: auto; /* Если не влезут, будет горизонтальный скролл */
+            flex-wrap: nowrap;
+            overflow-x: auto;
             padding-bottom: 5px;
             -webkit-overflow-scrolling: touch;
+            position: relative;
+            z-index: 3;
         }
 
-        /* Для очень маленьких экранов - разрешаем перенос */
         @media (max-width: 380px) {
             .product-methods {
                 flex-wrap: wrap;
@@ -125,9 +173,9 @@
 
         .product-card {
             background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 165, 0, 0.3);
-            border-radius: 16px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 30px;
             padding: 12px 8px;
             cursor: pointer;
             transition: all 0.3s;
@@ -137,7 +185,24 @@
             text-align: center;
             animation: cardAppear 0.6s ease-out;
             animation-fill-mode: both;
-            box-shadow: 0 4px 15px rgba(255, 69, 0, 0.2);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .product-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .product-card:hover::before {
+            left: 100%;
         }
 
         .product-card:nth-child(1) { animation-delay: 0.1s; }
@@ -158,7 +223,8 @@
         .product-card:hover {
             transform: translateY(-3px) scale(1.02);
             border-color: #FF8C00;
-            box-shadow: 0 8px 20px rgba(255, 69, 0, 0.4);
+            box-shadow: 0 8px 20px rgba(255, 69, 0, 0.3);
+            background: rgba(255, 255, 255, 0.15);
         }
 
         .product-emoji {
@@ -194,13 +260,15 @@
             margin-bottom: 15px;
             justify-content: center;
             flex-wrap: wrap;
+            position: relative;
+            z-index: 3;
         }
 
         .currency-card {
             background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 165, 0, 0.3);
-            border-radius: 16px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 30px;
             padding: 12px 8px;
             cursor: pointer;
             transition: all 0.3s;
@@ -209,13 +277,31 @@
             text-align: center;
             animation: cardAppear 0.6s ease-out;
             animation-fill-mode: both;
-            box-shadow: 0 4px 15px rgba(255, 69, 0, 0.2);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .currency-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .currency-card:hover::before {
+            left: 100%;
         }
 
         .currency-card:hover {
             transform: translateY(-3px) scale(1.02);
             border-color: #FF8C00;
-            box-shadow: 0 8px 20px rgba(255, 69, 0, 0.4);
+            box-shadow: 0 8px 20px rgba(255, 69, 0, 0.3);
+            background: rgba(255, 255, 255, 0.15);
         }
 
         .currency-emoji {
@@ -241,7 +327,7 @@
             color: #FFE4B5;
         }
 
-        /* Панель с деталями */
+        /* Панель с деталями - теперь появляется сверху */
         .details-panel {
             background: rgba(0, 0, 0, 0.3);
             backdrop-filter: blur(20px);
@@ -249,24 +335,26 @@
             border-radius: 24px;
             padding: 15px;
             margin-top: 10px;
-            animation: panelAppear 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            animation: slideDown 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
             display: none;
             box-shadow: 0 15px 30px -10px rgba(255, 69, 0, 0.3);
+            position: relative;
+            z-index: 10;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-50px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
         }
 
         .details-panel.show {
             display: block;
-        }
-
-        @keyframes panelAppear {
-            from {
-                opacity: 0;
-                transform: scale(0.3) rotate(-5deg);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1) rotate(0);
-            }
         }
 
         .details-title {
@@ -283,7 +371,7 @@
 
         .product-badge {
             background: rgba(255, 140, 0, 0.3);
-            border-radius: 12px;
+            border-radius: 30px;
             padding: 6px 10px;
             margin-bottom: 12px;
             text-align: center;
@@ -291,13 +379,14 @@
             color: #FFE4B5;
             border: 1px solid #FF8C00;
             font-size: 12px;
+            backdrop-filter: blur(5px);
         }
 
         /* Плашка-напоминание о чеке */
         .receipt-reminder {
             background: rgba(255, 215, 0, 0.15);
             border: 1px solid #FFD700;
-            border-radius: 16px;
+            border-radius: 30px;
             padding: 10px;
             margin: 10px 0 10px 0;
             text-align: center;
@@ -326,10 +415,11 @@
 
         .details-box {
             background: rgba(0, 0, 0, 0.2);
-            border-radius: 16px;
+            border-radius: 30px;
             padding: 12px;
             margin-bottom: 12px;
             border: 1px solid rgba(255, 140, 0, 0.2);
+            backdrop-filter: blur(5px);
         }
 
         .detail-row {
@@ -363,18 +453,20 @@
             background: rgba(255, 140, 0, 0.2);
             border-left: 4px solid #FF8C00;
             padding: 10px;
-            border-radius: 8px;
+            border-radius: 30px;
             margin: 10px 0;
             color: #FFE4B5;
             font-family: 'Montserrat', sans-serif;
             font-size: 13px;
+            backdrop-filter: blur(5px);
         }
 
         /* Кнопки */
         .action-btn {
-            background: linear-gradient(135deg, #FF8C00, #FF4500);
-            border: none;
-            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 30px;
             padding: 12px;
             font-size: 14px;
             font-weight: 600;
@@ -387,24 +479,49 @@
             justify-content: center;
             gap: 8px;
             transition: all 0.3s;
-            border: 1px solid rgba(255, 215, 0, 0.3);
-            box-shadow: 0 0 15px rgba(255, 69, 0, 0.3);
-            font-family: 'Montserrat', sans-serif;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .action-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .action-btn:hover::before {
+            left: 100%;
         }
 
         .action-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 0 20px #FF4500;
+            box-shadow: 0 8px 20px rgba(255, 69, 0, 0.3);
+            border-color: #FF8C00;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .paid-btn {
+            border-color: rgba(76, 175, 80, 0.3);
+        }
+
+        .paid-btn:hover {
+            border-color: #4CAF50;
         }
 
         .back-btn {
             background: transparent;
-            border: 2px solid #FF8C00;
-            color: #fff;
+            border: 1px solid rgba(255, 140, 0, 0.3);
         }
 
         .back-btn:hover {
-            background: rgba(255, 140, 0, 0.2);
+            background: rgba(255, 140, 0, 0.1);
+            border-color: #FF8C00;
         }
 
         /* Кнопка фейерверка внизу */
@@ -413,12 +530,14 @@
             margin-top: auto;
             padding-top: 15px;
             padding-bottom: 5px;
+            position: relative;
+            z-index: 3;
         }
 
         .firework-btn {
-            background: rgba(255, 69, 0, 0.2);
-            border: 1px solid #FF8C00;
-            border-radius: 20px;
+            background: rgba(255, 69, 0, 0.1);
+            border: 1px solid rgba(255, 140, 0, 0.3);
+            border-radius: 30px;
             padding: 6px 12px;
             font-size: 11px;
             color: white;
@@ -432,9 +551,10 @@
         }
 
         .firework-btn:hover {
-            background: rgba(255, 140, 0, 0.4);
+            background: rgba(255, 140, 0, 0.2);
             transform: scale(1.05);
-            box-shadow: 0 0 15px rgba(255, 69, 0, 0.5);
+            box-shadow: 0 0 15px rgba(255, 69, 0, 0.3);
+            border-color: #FF8C00;
         }
 
         /* Солнечная вспышка */
@@ -477,6 +597,9 @@
     </style>
 </head>
 <body>
+    <!-- Контейнер для звезд -->
+    <div class="stars-container" id="starsContainer"></div>
+
     <div id="sunFlare" class="sun-flare"></div>
 
     <div class="container">
@@ -616,6 +739,40 @@
         tg.ready();
         tg.expand();
 
+        // Создаем звезды на фоне
+        function createStars() {
+            const container = document.getElementById('starsContainer');
+            const starCount = 50;
+            
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                
+                // Случайный размер
+                const size = Math.random() * 3 + 1;
+                star.style.width = size + 'px';
+                star.style.height = size + 'px';
+                
+                // Случайная позиция
+                star.style.left = Math.random() * 100 + '%';
+                
+                // Случайная анимация
+                const duration = Math.random() * 10 + 10;
+                const delay = Math.random() * 10;
+                star.style.animation = `floatStar ${duration}s linear infinite`;
+                star.style.animationDelay = delay + 's';
+                
+                // Случайное мерцание
+                if (Math.random() > 0.7) {
+                    star.style.animation = `floatStar ${duration}s linear infinite, twinkle ${Math.random() * 2 + 1}s ease-in-out infinite`;
+                }
+                
+                container.appendChild(star);
+            }
+        }
+
+        createStars();
+
         // Текущий выбранный продукт
         let selectedProduct = '';
 
@@ -721,7 +878,7 @@
             }
         }
 
-        // Показать детали валюты
+        // Показать детали валюты (сверху)
         function showCurrency(currency) {
             document.getElementById('rub').classList.remove('show');
             document.getElementById('byn').classList.remove('show');
