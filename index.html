@@ -73,6 +73,32 @@
             }
         }
 
+        /* Волна от касания */
+        .ripple {
+            position: fixed;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(0);
+            animation: ripple-animation 0.8s ease-out;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        @keyframes ripple-animation {
+            0% {
+                transform: scale(0);
+                opacity: 0.5;
+            }
+            50% {
+                transform: scale(20);
+                opacity: 0.3;
+            }
+            100% {
+                transform: scale(40);
+                opacity: 0;
+            }
+        }
+
         .container {
             max-width: 500px;
             margin: 0 auto;
@@ -84,7 +110,7 @@
             width: 100%;
         }
 
-        /* Сияющая звезда над заголовком (оставила только вращение) */
+        /* Сияющая звезда над заголовком */
         .glowing-star {
             text-align: center;
             margin-bottom: 5px;
@@ -400,7 +426,7 @@
             background: rgba(255, 255, 255, 0.02);
         }
 
-        /* Кнопка фейерверка внизу */
+        /* Кнопка теста */
         .firework-btn-container {
             text-align: center;
             margin-top: auto;
@@ -430,40 +456,6 @@
             color: #fff;
         }
 
-        /* Солнечная вспышка */
-        .sun-flare {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 150px;
-            height: 150px;
-            background: radial-gradient(circle, rgba(255,215,0,0.8) 0%, rgba(255,140,0,0.4) 50%, transparent 70%);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 1000;
-            opacity: 0;
-        }
-
-        .sun-flare.active {
-            animation: sunFlare 0.4s ease-out forwards;
-        }
-
-        @keyframes sunFlare {
-            0% {
-                opacity: 0;
-                transform: translate(-50%, -50%) scale(0.1);
-            }
-            50% {
-                opacity: 1;
-                transform: translate(-50%, -50%) scale(1.2);
-            }
-            100% {
-                opacity: 0;
-                transform: translate(-50%, -50%) scale(1.8);
-            }
-        }
-
         .hidden {
             display: none !important;
         }
@@ -472,8 +464,6 @@
 <body>
     <!-- Контейнер для звезд -->
     <div class="stars-container" id="starsContainer"></div>
-
-    <div id="sunFlare" class="sun-flare"></div>
 
     <div class="container">
         <!-- Сияющая звезда -->
@@ -492,19 +482,19 @@
             </div>
             
             <div class="product-methods">
-                <div class="product-card" onclick="selectProduct('club')">
+                <div class="product-card" onclick="createRipple(event); selectProduct('club')">
                     <img src="https://i.postimg.cc/VsbWcYzj/sparkling.png" class="product-icon" alt="Клуб">
                     <div class="product-name">Подписка на клуб</div>
                     <div class="product-desc">Доступ ко всем материалам</div>
                 </div>
                 
-                <div class="product-card" onclick="selectProduct('guide')">
+                <div class="product-card" onclick="createRipple(event); selectProduct('guide')">
                     <img src="https://i.postimg.cc/mZFyGbTY/light.png" class="product-icon" alt="Гайд">
                     <div class="product-name">Гайд</div>
                     <div class="product-desc">Подробное руководство</div>
                 </div>
                 
-                <div class="product-card" onclick="selectProduct('course')">
+                <div class="product-card" onclick="createRipple(event); selectProduct('course')">
                     <img src="https://i.postimg.cc/wxsQd69c/idea.png" class="product-icon" alt="Курс">
                     <div class="product-name">Курс</div>
                     <div class="product-desc">Полное обучение</div>
@@ -517,19 +507,19 @@
             <div id="productInfo" class="product-badge"></div>
             
             <div class="currency-methods">
-                <div class="currency-card" onclick="handleCurrencyClick('rub')">
+                <div class="currency-card" onclick="createRipple(event); handleCurrencyClick('rub')">
                     <span class="currency-emoji">🇷🇺</span>
                     <div class="currency-name">RUB</div>
                     <div class="currency-desc">Российский рубль</div>
                 </div>
                 
-                <div class="currency-card" onclick="handleCurrencyClick('byn')">
+                <div class="currency-card" onclick="createRipple(event); handleCurrencyClick('byn')">
                     <span class="currency-emoji">🇧🇾</span>
                     <div class="currency-name">BYN</div>
                     <div class="currency-desc">Белорусский рубль</div>
                 </div>
                 
-                <div class="currency-card" onclick="handleCurrencyClick('eur')">
+                <div class="currency-card" onclick="createRipple(event); handleCurrencyClick('eur')">
                     <span class="currency-emoji">💶</span>
                     <div class="currency-name">EUR/USD</div>
                     <div class="currency-desc">Евро / Доллар</div>
@@ -560,10 +550,10 @@
                         <span class="detail-value">✅ Активно</span>
                     </div>
                 </div>
-                <button class="action-btn" onclick="openLavaLink()">
+                <button class="action-btn" onclick="createRipple(event); openLavaLink()">
                     <span>🚀</span> Перейти к оплате RUB
                 </button>
-                <button class="action-btn back-btn" onclick="backToCurrencies()">
+                <button class="action-btn back-btn" onclick="createRipple(event); backToCurrencies()">
                     <span>←</span> Назад к валютам
                 </button>
             </div>
@@ -578,7 +568,7 @@
                 <div class="info-message">
                     ⏳ Расчетный счет скоро будет доступен
                 </div>
-                <button class="action-btn back-btn" onclick="backToCurrencies()">
+                <button class="action-btn back-btn" onclick="createRipple(event); backToCurrencies()">
                     <span>←</span> Назад к валютам
                 </button>
             </div>
@@ -593,16 +583,16 @@
                 <div class="info-message">
                     🌐 Ссылка на оплату скоро будет подготовлена. Ожидайте.
                 </div>
-                <button class="action-btn back-btn" onclick="backToCurrencies()">
+                <button class="action-btn back-btn" onclick="createRipple(event); backToCurrencies()">
                     <span>←</span> Назад к валютам
                 </button>
             </div>
         </div>
 
-        <!-- Маленькая кнопка для теста фейерверка -->
+        <!-- Маленькая кнопка для теста звезд -->
         <div class="firework-btn-container">
-            <button class="firework-btn" onclick="testFireworks()">
-                <span>🎆</span> протестировать фейерверк
+            <button class="firework-btn" onclick="createRipple(event); launchStars()">
+                <span>✨</span> протестировать звезды
             </button>
         </div>
     </div>
@@ -638,26 +628,38 @@
 
         createStars();
 
-        // Текущий выбранный продукт
-        let selectedProduct = '';
-
-        // Функция для солнечной вспышки
-        function sunFlare() {
-            const flare = document.getElementById('sunFlare');
-            flare.classList.remove('active');
-            void flare.offsetWidth;
-            flare.classList.add('active');
+        // Функция для создания волны (ripple)
+        function createRipple(event) {
+            const ripple = document.createElement('div');
+            ripple.className = 'ripple';
+            
+            const x = event.clientX;
+            const y = event.clientY;
+            
+            ripple.style.left = x + 'px';
+            ripple.style.top = y + 'px';
+            ripple.style.width = '20px';
+            ripple.style.height = '20px';
+            
+            document.body.appendChild(ripple);
             
             setTimeout(() => {
-                flare.classList.remove('active');
-            }, 400);
+                ripple.remove();
+            }, 800);
         }
 
-        // Функция для фейерверка
-        function launchFireworks() {
+        // Функция для разлетающихся звездочек
+        function launchStars() {
             const duration = 2 * 1000;
             const animationEnd = Date.now() + duration;
-            const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 1000 };
+            const defaults = { 
+                startVelocity: 25, 
+                spread: 360, 
+                ticks: 60, 
+                zIndex: 1000,
+                shapes: ['star'],
+                colors: ['#FFD700', '#FFA500', '#FF8C00', '#FFFACD', '#FFE4B5']
+            };
 
             function randomInRange(min, max) {
                 return Math.random() * (max - min) + min;
@@ -670,37 +672,30 @@
                     return clearInterval(interval);
                 }
 
-                const particleCount = 40 * (timeLeft / duration);
+                const particleCount = 30 * (timeLeft / duration);
                 
                 confetti(Object.assign({}, defaults, {
                     particleCount,
-                    origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 },
-                    colors: ['#FF4500', '#FF8C00', '#FFD700', '#FF6347']
+                    origin: { x: randomInRange(0.2, 0.4), y: Math.random() - 0.2 },
                 }));
                 
                 confetti(Object.assign({}, defaults, {
                     particleCount,
-                    origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 },
-                    colors: ['#8A2BE2', '#9370DB', '#BA55D3', '#DA70D6']
+                    origin: { x: randomInRange(0.6, 0.8), y: Math.random() - 0.2 },
                 }));
                 
                 confetti(Object.assign({}, defaults, {
                     particleCount: particleCount / 2,
                     origin: { x: 0.5, y: 0.5 },
-                    colors: ['#1E3C72', '#2A5298', '#4169E1', '#1E90FF']
                 }));
-            }, 250);
+            }, 200);
         }
 
-        // Тестовый фейерверк
-        function testFireworks() {
-            sunFlare();
-            launchFireworks();
-        }
+        // Текущий выбранный продукт
+        let selectedProduct = '';
 
         // Выбор продукта
         function selectProduct(product) {
-            sunFlare();
             selectedProduct = product;
             
             let productName = '';
@@ -724,18 +719,11 @@
             document.getElementById('productScreen').classList.add('hidden');
             document.getElementById('currencyScreen').classList.remove('hidden');
             
-            confetti({
-                particleCount: 30,
-                spread: 60,
-                origin: { y: 0.5 },
-                colors: ['#FF4500', '#FFD700', '#8A2BE2']
-            });
+            launchStars();
         }
 
         // Обработка клика по валюте
         function handleCurrencyClick(currency) {
-            sunFlare();
-            
             if (currency === 'rub') {
                 openLavaLink();
             } else {
@@ -751,26 +739,20 @@
             
             document.getElementById(currency).classList.add('show');
             
-            confetti({
-                particleCount: 20,
-                spread: 40,
-                origin: { y: 0.5 },
-                colors: ['#FF4500', '#FF8C00', '#8A2BE2']
-            });
+            launchStars();
         }
 
         // Вернуться к выбору валют
         function backToCurrencies() {
-            sunFlare();
             document.getElementById('rub').classList.remove('show');
             document.getElementById('byn').classList.remove('show');
             document.getElementById('eur').classList.remove('show');
+            launchStars();
         }
 
         // Открыть ссылку Lava Top для RUB
         function openLavaLink() {
-            sunFlare();
-            launchFireworks();
+            launchStars();
             
             window.open('https://app.lava.top/veratonika?tabId=products&sort=published', '_blank');
             
@@ -784,12 +766,12 @@
 
         // Кнопка "Назад к продуктам"
         function backToProducts() {
-            sunFlare();
             document.getElementById('productScreen').classList.remove('hidden');
             document.getElementById('currencyScreen').classList.add('hidden');
             document.getElementById('rub').classList.remove('show');
             document.getElementById('byn').classList.remove('show');
             document.getElementById('eur').classList.remove('show');
+            launchStars();
         }
 
         // Добавляем кнопку "Назад к продуктам"
@@ -797,7 +779,7 @@
         const backButton = document.createElement('button');
         backButton.className = 'action-btn back-btn';
         backButton.innerHTML = '<span>←</span> Назад к продуктам';
-        backButton.onclick = backToProducts;
+        backButton.onclick = function(e) { createRipple(e); backToProducts(); };
         backButton.style.marginTop = '10px';
         currencyScreen.appendChild(backButton);
     </script>
